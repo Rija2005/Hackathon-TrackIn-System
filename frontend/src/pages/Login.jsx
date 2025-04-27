@@ -1,7 +1,6 @@
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
-import axiosInstance from "../axios";
 import { useNavigate, Link } from "react-router-dom";
 import { 
   FaEnvelope, 
@@ -13,12 +12,28 @@ import {
   FaUserPlus
 } from "react-icons/fa";
 import { IoMdLock } from "react-icons/io";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FiAlertCircle } from "react-icons/fi";
+import { useDispatch, useSelector } from "react-redux";
+import { loginUser } from "../redux/slices/authSlice";
+import axiosInstance from "../redux/axios"; // tumhara axiosInstance import
 
 const Login = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    // Agar already logged in hai toh redirect
+    if (user) {
+      if (user.role === "admin") {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/dashboard");
+      }
+    }
+  }, [user, navigate]);
 
   const formik = useFormik({
     initialValues: {
@@ -35,14 +50,17 @@ const Login = () => {
     }),
     onSubmit: async (values) => {
       try {
-        const res = await axiosInstance.post("/auth/login", values);
-        localStorage.setItem("token", res.data.token);
-        localStorage.setItem("userRole", res.data.user.role);  // store userRole for AdminRoute
-        toast.success(res.data.message || "Login successful");
-        if (res.data.user.role === "admin") {
-          navigate("/admin/dashboard");
+        // Dispatch loginUser thunk with form values
+        const resultAction = await dispatch(loginUser(values));
+        if (loginUser.fulfilled.match(resultAction)) {
+          toast.success(resultAction.payload.message || "Login successful");
+          if (resultAction.payload.user.role === "admin") {
+            navigate("/admin/dashboard");
+          } else {
+            navigate("/dashboard");
+          }
         } else {
-          navigate("/dashboard");
+          toast.error(resultAction.payload || "Login failed");
         }
       } catch (err) {
         toast.error(err.response?.data?.message || "Login failed");
@@ -53,7 +71,7 @@ const Login = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div className="bg-white rounded-xl shadow-2xl overflow-hidden">
+          <div className="bg-gray-50 rounded-xl shadow-2xl overflow-hidden">
           {/* Header */}
           <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-center">
             <div className="flex justify-center mb-2">
@@ -72,8 +90,8 @@ const Login = () => {
               </label>
               <div className={`flex items-center border rounded-lg px-3 py-2 transition-all duration-200 ${
                 formik.errors.email && formik.touched.email 
-                  ? "border-red-500 focus-within:border-red-500" 
-                  : "border-gray-300 focus-within:border-blue-500"
+                  ? "border-pink-400 focus-within:border-pink-400" 
+                  : "border-gray-300 focus-within:border-indigo-900"
               }`}>
                 <FaEnvelope className="text-gray-400 mr-2" />
                 <input
@@ -87,7 +105,7 @@ const Login = () => {
                 />
               </div>
               {formik.errors.email && formik.touched.email && (
-                <p className="text-red-500 text-xs mt-1 flex items-center">
+                <p className="text-pink-400 text-xs mt-1 flex items-center">
                   <FiAlertCircle className="mr-1" />
                   {formik.errors.email}
                 </p>
@@ -101,8 +119,8 @@ const Login = () => {
               </label>
               <div className={`flex items-center border rounded-lg px-3 py-2 transition-all duration-200 ${
                 formik.errors.password && formik.touched.password 
-                  ? "border-red-500 focus-within:border-red-500" 
-                  : "border-gray-300 focus-within:border-blue-500"
+                  ? "border-pink-400 focus-within:border-pink-400" 
+                  : "border-gray-300 focus-within:border-indigo-900"
               }`}>
                 <FaLock className="text-gray-400 mr-2" />
                 <input
@@ -123,7 +141,7 @@ const Login = () => {
                 </button>
               </div>
               {formik.errors.password && formik.touched.password && (
-                <p className="text-red-500 text-xs mt-1 flex items-center">
+                <p className="text-pink-400 text-xs mt-1 flex items-center">
                   <FiAlertCircle className="mr-1" />
                   {formik.errors.password}
                 </p>
@@ -153,7 +171,7 @@ const Login = () => {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-3 rounded-lg font-medium flex items-center justify-center space-x-2 transition-all duration-300 shadow-md"
+              className="w-full bg-indigo-900 hover:bg-indigo-800 text-white py-3 rounded-lg font-medium flex items-center justify-center space-x-2 transition-all duration-300 shadow-md"
             >
               <FaSignInAlt />
               <span>Sign In</span>

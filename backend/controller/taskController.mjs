@@ -11,7 +11,8 @@ export const createTask = async (req, res) => {
     await newTask.save();
     res.status(201).json({ message: 'Task created successfully', task: newTask });
   } catch (error) {
-    res.status(500).json({ message: 'Server error during task creation' });
+    console.error('Error in createTask:', error);
+    res.status(500).json({ message: 'Server error during task creation', error: error.message });
   }
 };
 
@@ -21,7 +22,8 @@ export const getTasks = async (req, res) => {
     const tasks = await TaskModel.find().populate('assignedTo', 'username email');
     res.status(200).json(tasks);
   } catch (error) {
-    res.status(500).json({ message: 'Server error fetching tasks' });
+    console.error('Error in getTasks:', error);
+    res.status(500).json({ message: 'Server error fetching tasks', error: error.message });
   }
 };
 
@@ -36,7 +38,8 @@ export const updateTask = async (req, res) => {
     }
     res.status(200).json({ message: 'Task updated successfully', task: updatedTask });
   } catch (error) {
-    res.status(500).json({ message: 'Server error updating task' });
+    console.error('Error in updateTask:', error);
+    res.status(500).json({ message: 'Server error updating task', error: error.message });
   }
 };
 
@@ -50,6 +53,7 @@ export const deleteTask = async (req, res) => {
     }
     res.status(200).json({ message: 'Task deleted successfully' });
   } catch (error) {
-    res.status(500).json({ message: 'Server error deleting task' });
+    console.error('Error in deleteTask:', error);
+    res.status(500).json({ message: 'Server error deleting task', error: error.message });
   }
 };

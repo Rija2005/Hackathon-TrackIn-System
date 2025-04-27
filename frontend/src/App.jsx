@@ -1,27 +1,41 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import TaskBoardPage from "./pages/TaskBoardPage";
-import ProtectedRoutes from "./ProtectedRoutes";
+import Dashboard from "./pages/Dashboard";
+import ProtectedRoute from "./ProtectedRoutes";
+import Navbar from "./Components/Navbar";
 import { ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
-
-const App = () => {
+import './index.css'
+function App() {
   return (
-    <Router>
-      <Routes>
-      <Route path="/" element={<Home />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/login" element={<Login />} />
+    <>
+      <Router>
+        <Navbar />
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
 
-        {/* Wrap protected routes here */}
-        <Route element={<ProtectedRoutes />}>
-          <Route path="/dashboard" element={<TaskBoardPage />} />
-        </Route>
-      </Routes>
-    </Router>
+          {/* Protected Route */}
+          <Route 
+            path="/dashboard" 
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } 
+          />
+
+          {/* Catch All (404 - Redirect to Home) */}
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </Router>
+      <ToastContainer />
+    </>
   );
-};
+}
 
 export default App;

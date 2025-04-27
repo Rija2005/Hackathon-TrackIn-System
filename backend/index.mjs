@@ -6,6 +6,7 @@ import chalk from 'chalk';
 import authRoutes from './routes/authRoutes.mjs';
 import tokenVerification from './middleware/authMiddleware.mjs';
 import taskRoutes from './routes/taskRoutes.mjs';
+import userRoutes from './routes/userRoutes.mjs';
 dotenv.config();
 
 const app = express();
@@ -23,6 +24,7 @@ app.use(
 app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
+app.use('/api/users', userRoutes);
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGO_URL) 
